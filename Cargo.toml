@@ -1,10 +1,13 @@
 [package]
 name = "NRes"
-version = "0.2.0"
+version = "1.0.0"
 edition = "2021"
 
 [dependencies]
+ahash = "0.8.3"
+clap = { version = "4.3.10", features = ["derive"] }
 derive_more = "0.99.17"
+memchr = "2.5.0"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

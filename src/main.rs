@@ -1,59 +1,66 @@
-use windows::{
-    core::PCSTR,
-    Win32::{
-        Foundation::HWND,
-        Graphics::Gdi::{
-            ChangeDisplaySettingsExA, EnumDisplaySettingsA, CDS_TYPE, DEVMODEA,
-            ENUM_CURRENT_SETTINGS,
-        },
-    },
-};
+use std::process::ExitCode;
 
+use windows::core::PCSTR;
+
+mod cli;
+mod device_info;
+mod device_utils;
 mod display_change;
 
-struct NewDisplayConfig {
-    display_frequency: u32,
-}
-
-fn change_display_settings(
-    device_name: PCSTR,
-    new_config: NewDisplayConfig,
-) -> Result<display_change::DisplayChangeOk, display_change::DisplayChangeErr> {
-    let mut dm = DEVMODEA::default();
-    dm.dmSize = std::mem::size_of_val(&dm).try_into().unwrap();
-
-    let r = unsafe { EnumDisplaySettingsA(device_name, ENUM_CURRENT_SETTINGS, &mut dm).as_bool() };
-
-    if r {
-        dm.dmDisplayFrequency = new_config.display_frequency
-    } else {
-        return Err(display_change::DisplayChangeErr::CouldNotGetDisplaySettings);
-    }
-
-    let ret = unsafe {
-        ChangeDisplaySettingsExA(
-            device_name,
-            Some(&dm),
-            HWND::default(),
-            CDS_TYPE::default(),
-            None,
-        )
-    };
-
-    display_change::disp_change_to_enum(ret)
-}
-
-fn main() {
-    let config = NewDisplayConfig {
-        display_frequency: 300,
-    };
-    let r = change_display_settings(PCSTR::null(), config);
+fn update_device(config: device_utils::NewDisplayConfig, device_name: PCSTR) -> bool {
+    let r = device_utils::change_display_settings(device_name, config);
 
     match r {
-        Ok(state) => match state {
-            display_change::DisplayChangeOk::Ok => println!("{}", state),
-            display_change::DisplayChangeOk::NeedRestart => println!("{}", state),
-        },
-        Err(error) => println!("Change on display failed : {}", error),
+        Ok(state) => {
+            match state {
+                display_change::DisplayChangeOk::Ok => println!("{}", state),
+                display_change::DisplayChangeOk::NeedRestart => println!("{}", state),
+            }
+
+            true
+        }
+        Err(error) => {
+            println!("Change on display failed : {}", error);
+
+            false
+        }
+    }
+}
+
+fn main() -> ExitCode {
+    let cli = cli::parse_cli();
+    if cli.is_none() {
+        return ExitCode::FAILURE;
+    }
+
+    let cli = cli.unwrap();
+
+    let display_devices = device_info::get_active_display_devices();
+    let dd_names = device_info::dd_to_u32_pcstr_hashmap(&display_devices);
+
+    // for the moment we don't need display_devices. Maybe in the future ?
+    drop(display_devices);
+
+    let mut validated = true;
+
+    for (display_index, display_settings) in cli.display_settings {
+        let display_name = dd_names.get(&display_index);
+        if display_name.is_none() {
+            println!("Error : Unknown display index.");
+            validated = false;
+
+            continue;
+        }
+
+        let r = update_device(display_settings, *display_name.unwrap());
+        if !r {
+            validated = false
+        }
+    }
+
+    if validated {
+        ExitCode::SUCCESS
+    } else {
+        ExitCode::FAILURE
     }
 }

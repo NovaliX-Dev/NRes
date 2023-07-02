@@ -25,9 +25,7 @@ pub(crate) enum DisplayChangeErr {
     CouldNotGetDisplaySettings,
 }
 
-pub(crate) fn disp_change_to_enum(
-    r: DISP_CHANGE,
-) -> Result<DisplayChangeOk, DisplayChangeErr> {
+pub(crate) fn disp_change_to_result(r: DISP_CHANGE) -> Result<DisplayChangeOk, DisplayChangeErr> {
     match r {
         DISP_CHANGE_SUCCESSFUL => {
             Ok(DisplayChangeOk::Ok)
