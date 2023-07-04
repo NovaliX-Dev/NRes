@@ -11,7 +11,7 @@ use crate::device_utils::NewDisplayConfig;
 mod utils {
     use std::fmt::Display;
 
-    pub fn split_at_slip_mid_char(str: &str, mid: usize) -> Option<(&str, &str)> {
+    pub fn split_at_skip_mid_char(str: &str, mid: usize) -> Option<(&str, &str)> {
         // is_char_boundary checks that the index is in [0, .len()]
         if str.is_char_boundary(mid) && str.is_char_boundary(mid + 1) {
             // SAFETY: just checked that `mid` is on a char boundary.
@@ -95,7 +95,7 @@ impl TypedValueParser for RefreshRateParser {
             ));
         }
 
-        let str_pair = utils::split_at_slip_mid_char(value, equal_char_usize.unwrap());
+        let str_pair = utils::split_at_skip_mid_char(value, equal_char_usize.unwrap());
         assert!(str_pair.is_some());
 
         let (display_index_str, refresh_rate_str) = str_pair.unwrap();
