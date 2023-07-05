@@ -7,20 +7,20 @@ mod device_info;
 mod device_utils;
 mod display_change;
 
-fn update_device(config: device_utils::NewDisplayConfig, device_name: PCSTR) -> bool {
-    let r = device_utils::change_display_settings(device_name, config);
+fn update_device(config: device_utils::NewDisplayConfig, device_id: (u32, PCSTR)) -> bool {
+    let r = device_utils::change_display_settings(device_id.1, config);
 
     match r {
         Ok(state) => {
             match state {
-                display_change::DisplayChangeOk::Ok => println!("{}", state),
-                display_change::DisplayChangeOk::NeedRestart => println!("{}", state),
+                display_change::DisplayChangeOk::Ok => println!("[{}] {}", device_id.0, state),
+                display_change::DisplayChangeOk::NeedRestart => println!("[{}] {}", device_id.0, state),
             }
 
             true
         }
         Err(error) => {
-            println!("Change on display failed : {}", error);
+            println!("[{}] Change on display failed : {}", device_id.0, error);
 
             false
         }
@@ -43,16 +43,16 @@ fn main() -> ExitCode {
 
     let mut validated = true;
 
-    for (display_index, display_settings) in cli.display_settings {
-        let display_name = dd_names.get(&display_index);
-        if display_name.is_none() {
+    for (d_index, display_settings) in cli.display_settings {
+        let d_names = dd_names.get(&d_index);
+        if d_names.is_none() {
             println!("Error : Unknown display index.");
             validated = false;
 
             continue;
         }
 
-        let r = update_device(display_settings, *display_name.unwrap());
+        let r = update_device(display_settings, (d_index, *d_names.unwrap()));
         if !r {
             validated = false
         }
