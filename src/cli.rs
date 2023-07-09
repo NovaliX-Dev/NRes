@@ -46,7 +46,7 @@ enum CliRaw {
 
 #[derive(Args)]
 struct SetCliRaw {
-    /// Specify the new refresh rates for the specifics monitors. The syntax is `<display_id>:<refresh_rate>`.
+    /// Specify the new refresh rates for the specifics monitors. The syntax is `<display_index>:<refresh_rate>`.
     refresh_rate: Vec<DisplaySettings>,
 }
 
