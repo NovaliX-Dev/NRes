@@ -13,7 +13,7 @@ pub(crate) enum DisplayChangeOk {
     NeedRestart,
 }
 
-#[derive(derive_more::Display)]
+#[derive(derive_more::Display, Debug)]
 pub(crate) enum DisplayChangeErr {
     #[display(fmt = "{}", _0)]
     Err(&'static str),

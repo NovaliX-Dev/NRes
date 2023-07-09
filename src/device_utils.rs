@@ -20,10 +20,7 @@ pub(crate) fn change_display_settings(
     device_name: PCSTR,
     new_config: NewDisplayConfig,
 ) -> Result<display_change::DisplayChangeOk, display_change::DisplayChangeErr> {
-    let mut dm = match get_display_device_settings(&device_name) {
-        Some(dm) => dm,
-        None => return Err(display_change::DisplayChangeErr::CouldNotGetDisplaySettings),
-    };
+    let mut dm = get_display_device_settings(&device_name)?;
 
     dm.dmDisplayFrequency = new_config.display_frequency;
 
@@ -47,15 +44,15 @@ pub(crate) fn apply_settings_to_display(
     display_change::disp_change_to_result(ret)
 }
 
-pub(crate) fn get_display_device_settings(device_name: &PCSTR) -> Option<DEVMODEA> {
+pub(crate) fn get_display_device_settings(device_name: &PCSTR) -> Result<DEVMODEA, display_change::DisplayChangeErr> {
     let mut dm = DEVMODEA::default();
     dm.dmSize = std::mem::size_of_val(&dm).try_into().unwrap();
 
     let r = unsafe { EnumDisplaySettingsA(*device_name, ENUM_CURRENT_SETTINGS, &mut dm).as_bool() };
 
     if r {
-        Some(dm)
+        Ok(dm)
     } else {
-        None
+        Err(display_change::DisplayChangeErr::CouldNotGetDisplaySettings)
     }
 }

@@ -3,7 +3,7 @@ use std::ffi::OsStr;
 use ahash::AHashMap;
 use clap::{
     builder::{TypedValueParser, ValueParserFactory},
-    Parser,
+    Args, Parser,
 };
 
 use crate::device_utils::NewDisplayConfig;
@@ -36,7 +36,17 @@ mod utils {
 }
 
 #[derive(Parser)]
-struct CliRaw {
+enum CliRaw {
+    /// Change the current refresh rate settings.
+    Set(SetCliRaw),
+
+    /// List all the display monitors with their specific refresh rate.
+    List,
+}
+
+#[derive(Args)]
+struct SetCliRaw {
+    /// Specify the new refresh rates for the specifics monitors. The syntax is `<display_id>:<refresh_rate>`.
     refresh_rate: Vec<DisplaySettings>,
 }
 
@@ -136,15 +146,26 @@ impl TypedValueParser for RefreshRateParser {
     }
 }
 
-pub(crate) struct Cli {
+pub(crate) enum Cli {
+    Set(SetCli),
+    List,
+}
+
+pub(crate) struct SetCli {
     pub display_settings: AHashMap<u32, NewDisplayConfig>,
 }
 
 pub(crate) fn parse_cli() -> Option<Cli> {
     let cli_raw = CliRaw::parse();
 
-    let mut validated = true;
+    match cli_raw {
+        CliRaw::Set(cli_raw) => validate_set_cli(cli_raw),
+        CliRaw::List => Some(Cli::List),
+    }
+}
 
+fn validate_set_cli(cli_raw: SetCliRaw) -> Option<Cli> {
+    let mut validated = true;
     let mut refresh_rate_hash = AHashMap::new();
     for refresh_rate in cli_raw.refresh_rate {
         let DisplaySettings(id, infos) = refresh_rate;
@@ -158,11 +179,10 @@ pub(crate) fn parse_cli() -> Option<Cli> {
 
         refresh_rate_hash.insert(id, infos);
     }
-
     if validated {
-        Some(Cli {
+        Some(Cli::Set(SetCli {
             display_settings: refresh_rate_hash,
-        })
+        }))
     } else {
         None
     }
