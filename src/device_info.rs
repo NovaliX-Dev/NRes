@@ -15,6 +15,9 @@ pub(crate) fn get_active_display_devices() -> Vec<(u32, DISPLAY_DEVICEA)> {
         i += 1;
 
         r = unsafe { EnumDisplayDevicesA(PCSTR::null(), i - 1, &mut dd, 0).as_bool() };
+        if !r {
+            break;
+        }
 
         // Windows seems to keep track of all the displays ever connected, so we need to filter those currently connected
         // TODO: maybe add a trait to check flags ?
