@@ -7,6 +7,15 @@ mod device_name_utils;
 mod device_utils;
 mod display_change_res;
 
+macro_rules! print_display_msg {
+    ($index: expr, $msg: literal) => {
+        println!("[{}] {}", $index, $msg)
+    };
+    ($index: expr, $format_str: literal, $($format_args: expr),*) => {
+        println!("[{}] {}", $index, format!($format_str, $($format_args),*))
+    };
+}
+
 fn update_device(config: device_utils::NewDisplayConfig, device_id: (u32, PCSTR)) -> bool {
     let r = device_utils::change_display_settings(device_id.1, config);
 
@@ -15,14 +24,14 @@ fn update_device(config: device_utils::NewDisplayConfig, device_id: (u32, PCSTR)
             match state {
                 display_change_res::DisplayChangeOk::Ok => println!("[{}] {}", device_id.0, state),
                 display_change_res::DisplayChangeOk::NeedRestart => {
-                    println!("[{}] {}", device_id.0, state)
+                    print_display_msg!(device_id.0, "{}", state)
                 }
             }
 
             true
         }
         Err(error) => {
-            println!("[{}] Change on display failed : {}", device_id.0, error);
+            print_display_msg!(device_id.0, "Change on display failed : {}", error);
 
             false
         }
@@ -38,7 +47,7 @@ fn main_set(
     for (d_index, display_settings) in cli.display_settings {
         let d_names = dd_names.get(&d_index);
         if d_names.is_none() {
-            println!("Error : Unknown display index.");
+            print_display_msg!(d_index, "Error: Unknown display index.");
             *validated = false;
 
             continue;
@@ -58,7 +67,7 @@ fn main_list(display_devices: Vec<(u32, windows::Win32::Graphics::Gdi::DISPLAY_D
         let device_info = device_utils::get_display_device_settings(&name);
 
         if let Err(e) = device_info {
-            println!("[{}] {}", i, e);
+            print_display_msg!(i, "{}", e);
             continue;
         }
 

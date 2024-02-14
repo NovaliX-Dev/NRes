@@ -13,7 +13,7 @@ use crate::display_change_res;
 
 #[derive(Clone)]
 pub(crate) struct NewDisplayConfig {
-    pub(crate) display_frequency: u32,
+    pub(crate) refresh_rate: u32,
 }
 
 pub(crate) fn change_display_settings(
@@ -22,7 +22,7 @@ pub(crate) fn change_display_settings(
 ) -> Result<display_change_res::DisplayChangeOk, display_change_res::DisplayChangeErr> {
     let mut dm = get_display_device_settings(&device_name)?;
 
-    dm.dmDisplayFrequency = new_config.display_frequency;
+    dm.dmDisplayFrequency = new_config.refresh_rate;
 
     apply_settings_to_display(device_name, dm)
 }
