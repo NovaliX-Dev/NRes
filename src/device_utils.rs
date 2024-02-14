@@ -76,7 +76,6 @@ pub(crate) fn get_active_display_devices() -> Vec<(u32, DISPLAY_DEVICEA)> {
         }
 
         // Windows seems to keep track of all the displays ever connected, so we need to filter those currently connected
-        // TODO: maybe add a trait to check flags ?
         if dd.StateFlags & DISPLAY_DEVICE_ACTIVE != DISPLAY_DEVICE_ACTIVE {
             continue;
         }
