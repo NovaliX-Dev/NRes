@@ -94,7 +94,10 @@ mod display_args {
                 None => return Err(clap::Error::new(clap::error::ErrorKind::InvalidUtf8)),
             };
 
-            let mut equal_char_iter = memchr::memchr_iter(b':', value.as_bytes());
+            let mut equal_char_iter = value.bytes()
+                .enumerate()
+                .filter(|(_, b)| b == &b':')
+                .map(|(i, _)| i);
 
             let first = match equal_char_iter.next() {
                 Some(first) => first,

@@ -1,6 +1,6 @@
 [package]
 name = "NRes"
-version = "1.1.2"
+version = "1.2.0"
 edition = "2021"
 
 [profile.release]
@@ -10,7 +10,6 @@ lto = true
 ahash = "0.8.3"
 clap = { version = "4.3.10", features = ["derive"] }
 derive_more = "0.99.17"
-memchr = "2.5.0"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
