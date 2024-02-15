@@ -11,7 +11,7 @@ use windows::{
 
 use crate::display_change_res;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub(crate) struct NewDisplayConfig {
     pub(crate) refresh_rate: u32,
 }

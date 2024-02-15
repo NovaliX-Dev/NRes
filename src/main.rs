@@ -40,7 +40,7 @@ fn update_device(config: device_utils::NewDisplayConfig, device_id: (u32, PCSTR)
 
 fn main_set(
     display_devices: &[(u32, windows::Win32::Graphics::Gdi::DISPLAY_DEVICEA)],
-    cli: cli::SetCli,
+    cli: cli::set_cli::SetCli,
     validated: &mut bool,
 ) {
     let dd_names = device_name_utils::dd_to_u32_pcstr_hashmap(display_devices);
